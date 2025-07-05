@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
+
+	"github.com/iswangyf/config_center_service/internal/dbinit"
 )
 
 func main() {
 	fmt.Println("Config Center Service started.")
-	os.Exit(0)
+	dbinit.InitConfig()
+	dbinit.InitDB()
 }
