@@ -3,6 +3,7 @@ package dbinit
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"gopkg.in/yaml.v2"
 	"gorm.io/driver/mysql"
@@ -38,6 +39,7 @@ func InitConfig() {
 }
 
 func InitDB() {
+	InitConfig()
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		AppConfig.Database.User,
 		AppConfig.Database.Password,
@@ -51,7 +53,22 @@ func InitDB() {
 		panic("failed to connect database")
 	}
 
-	if err = DB.AutoMigrate(&model.ModuleGroup{}, &model.Module{}); err != nil {
+	defaultModuleGroup := &model.ModuleGroup{
+		Name:        "Default Group",
+		Description: "This is a default module group",
+		CreatedAt:   time.Now(),
+	}
+
+	defaultModule := &model.Module{
+		GroupID:   100, // Assuming the group ID is 1 for the default
+		Name:      "Default Module",
+		Content:   "This is a default module content",
+		ValidFrom: defaultModuleGroup.CreatedAt,                  // Assuming CreateAt is set to the current time
+		ValidTo:   defaultModuleGroup.CreatedAt.AddDate(1, 0, 0), // Valid for one year
+		Enabled:   true,
+	}
+
+	if err = DB.AutoMigrate(&defaultModuleGroup, &defaultModule); err != nil {
 		panic("failed to migrate database")
 	}
 
